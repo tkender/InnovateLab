@@ -1,0 +1,180 @@
+[
+    {
+        "id": "26d77976.cb6cd6",
+        "type": "tab",
+        "label": "Stop Light - Variable Delay",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "8dd872c2.9fa59",
+        "type": "rpi-gpio out",
+        "z": "26d77976.cb6cd6",
+        "name": "RED",
+        "pin": "11",
+        "set": true,
+        "level": "1",
+        "freq": "",
+        "out": "out",
+        "x": 790,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "7b8b89a1.8e23d8",
+        "type": "rpi-gpio out",
+        "z": "26d77976.cb6cd6",
+        "name": "YELLOW",
+        "pin": "13",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "x": 800,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "9fdb4cd3.71bdb",
+        "type": "rpi-gpio out",
+        "z": "26d77976.cb6cd6",
+        "name": "GREEN",
+        "pin": "15",
+        "set": true,
+        "level": "0",
+        "freq": "",
+        "out": "out",
+        "x": 800,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "bb9c5abf.de3f28",
+        "type": "delay",
+        "z": "26d77976.cb6cd6",
+        "name": "",
+        "pauseType": "delayv",
+        "timeout": "2",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 540,
+        "y": 220,
+        "wires": [
+            [
+                "404b3a8b.61bfb4"
+            ]
+        ]
+    },
+    {
+        "id": "20793609.5beb9a",
+        "type": "inject",
+        "z": "26d77976.cb6cd6",
+        "name": "start",
+        "topic": "",
+        "payload": "red",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 250,
+        "y": 320,
+        "wires": [
+            [
+                "404b3a8b.61bfb4"
+            ]
+        ]
+    },
+    {
+        "id": "25630b7d.e6f154",
+        "type": "debug",
+        "z": "26d77976.cb6cd6",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 540,
+        "y": 840,
+        "wires": []
+    },
+    {
+        "id": "404b3a8b.61bfb4",
+        "type": "function",
+        "z": "26d77976.cb6cd6",
+        "name": "Stoplight Control",
+        "func": "// Stop Light control - single light\n\n// Establish matrix matching outputs\nvar msgList =  [[\"red\", 1, 0, 0],\n                [\"yellow\", 0, 1, 0],\n                [\"green\",0, 0, 1]];\n\n// Set durations for lights in ms\nvar redDuration = 10000;\nvar yellowDuration = 2000;\nvar greenDuration = 20000;\nvar delay = 0;\n\n// Receive intial message of which LED is lit\nvar currLed = msg.payload;\n\nvar nextLed = \"\";\nvar nextIdx = 0;\n\n// Establish sequence of lights\nif (currLed === \"red\")\n    {\n        nextLed = \"yellow\";\n        nextIdx = 1;\n        delay = yellowDuration;\n    }\nelse if (currLed === \"yellow\")\n    {\n        nextLed = \"green\"\n        nextIdx = 2\n        delay = greenDuration;\n    }\nelse if (currLed === \"green\")\n    {\n        nextLed = \"red\"\n        nextIdx = 0\n        delay = redDuration;\n    }\nelse {\n        nextLed = \"yellow\"\n        nextIdx = 2\n        delay = yellowDuration;\n   }\n\n\n// Populate messages for all outputs\nvar newMsg1 = {payload:nextLed};\nnewMsg1.delay = delay;\nvar newMsg2 = {payload:msgList[nextIdx][1]};\nvar newMsg3 = {payload:msgList[nextIdx][2]};\nvar newMsg4 = {payload:msgList[nextIdx][3]};\n\n\nreturn [newMsg1,newMsg2,newMsg3,newMsg4];",
+        "outputs": 4,
+        "noerr": 0,
+        "x": 570,
+        "y": 320,
+        "wires": [
+            [
+                "bb9c5abf.de3f28"
+            ],
+            [
+                "8dd872c2.9fa59"
+            ],
+            [
+                "7b8b89a1.8e23d8"
+            ],
+            [
+                "9fdb4cd3.71bdb"
+            ]
+        ]
+    },
+    {
+        "id": "4ce50c23.4ba4c4",
+        "type": "change",
+        "z": "26d77976.cb6cd6",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "reset",
+                "pt": "msg",
+                "to": "true",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 360,
+        "y": 180,
+        "wires": [
+            [
+                "bb9c5abf.de3f28"
+            ]
+        ]
+    },
+    {
+        "id": "e8f5a45.17ccb58",
+        "type": "inject",
+        "z": "26d77976.cb6cd6",
+        "name": "stop",
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 170,
+        "y": 180,
+        "wires": [
+            [
+                "4ce50c23.4ba4c4"
+            ]
+        ]
+    }
+]
